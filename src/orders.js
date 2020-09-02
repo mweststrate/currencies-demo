@@ -43,26 +43,12 @@ export function getOrderPrice(order, currencies) {
   return order.price * (1 / currencies[order.currency])
 }
 
-export function setOrderPrice(orders, orderId, price) {
-  return orders.map((order) =>
-    order.id === orderId
-      ? {
-          ...order,
-          price
-        }
-      : order
-  )
+export function setOrderPrice(order, newPrice) {
+  order.price = newPrice
 }
 
-export function setOrderCurrency(orders, orderId, currency) {
-  return orders.map((order) =>
-    order.id === orderId
-      ? {
-          ...order,
-          currency
-        }
-      : order
-  )
+export function setOrderCurrency(order, currency) {
+  order.currency = currency
 }
 
 export function getOrderTotal(orders, currencies) {
@@ -73,17 +59,14 @@ export function getOrderTotal(orders, currencies) {
 }
 
 export function addOrder(orders) {
-  return [
-    ...orders,
-    {
-      id: uuidv4(),
-      title: "Item " + Math.round(Math.random() * 1000),
-      price: Math.round(Math.random() * 1000),
-      currency: "usd"
-    }
-  ]
+  orders.push({
+    id: uuidv4(),
+    title: "Item " + Math.round(Math.random() * 1000),
+    price: Math.round(Math.random() * 1000),
+    currency: "usd"
+  })
 }
 
 export function setCurrencyRate(currencies, currency, price) {
-  return { ...currencies, [currency]: price }
+  currencies[currency] = price
 }

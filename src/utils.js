@@ -18,7 +18,8 @@ export function uuidv4() {
 let updater
 
 export function useForceUpdate() {
-  return updater
+  const [tick, setTick] = useState(0)
+  return useCallback(() => setTick((t) => t + 1), [])
 }
 
 export function useForceUpdateRoot() {
