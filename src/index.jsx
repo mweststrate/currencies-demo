@@ -11,7 +11,7 @@ import {
 import { observer, useLocalObservable } from "mobx-react-lite"
 import { render } from "react-dom"
 import {
-  getInitialOrders,
+  createOrderStore,
   getInitialCurrencies,
   getOrderPrice,
   setOrderPrice,
@@ -34,63 +34,36 @@ import "./styles.css"
 const CurrencyContext = createContext()
 
 const App = () => {
-  const currencies = useLocalObservable(getInitialCurrencies)
-  const orders = useLocalObservable(getInitialOrders)
-
-  const handleAdd = () => {
-    addOrder(orders)
-  }
-  const handleChangePrice = (order, newPrice) => {
-    setOrderPrice(order, newPrice)
-  }
-  const handleChangeCurrency = (order, newCurrency) => {
-    setOrderCurrency(order, newCurrency)
-  }
-
-  const handleChangeCurrencyRate = (currency, newRate) => {
-    setCurrencyRate(currencies, currency, newRate)
-  }
+  const [currencies] = useState(getInitialCurrencies)
+  const [store] = useState(() => createOrderStore(currencies))
 
   return (
     <CurrencyContext.Provider value={currencies}>
       <div className="App">
         <h1>Orders</h1>
-        <Orders
-          orders={orders}
-          onChangePrice={handleChangePrice}
-          onChangeCurrency={handleChangeCurrency}
-        />
+        <Orders orders={store.orders} />
         <div className="actions">
-          <button onClick={handleAdd}>Add</button>
-          <OrderTotal orders={orders} />
+          <button onClick={store.addRandomOrder}>Add</button>
+          <OrderTotal store={store} />
         </div>
         <h1>Exchange rates</h1>
-        <Currencies
-          currencies={currencies}
-          onChangeCurrency={handleChangeCurrencyRate}
-        />
+        <Currencies currencies={currencies} />
       </div>
     </CurrencyContext.Provider>
   )
 }
 
-const Orders = observer(({ orders, onChangePrice, onChangeCurrency }) => {
+const Orders = observer(({ orders }) => {
   return (
     <Table columns={["Article", "Price", "Currency", "Price"]}>
       {orders.map((order) => (
-        <Orderline
-          key={order.id}
-          order={order}
-          onChangeCurrency={onChangeCurrency}
-          onChangePrice={onChangePrice}
-        />
+        <Orderline key={order.id} order={order} />
       ))}
     </Table>
   )
 })
 
-const Orderline = observer(({ order, onChangePrice, onChangeCurrency }) => {
-  const currencies = useContext(CurrencyContext)
+const Orderline = observer(({ order }) => {
   return (
     <tr>
       <td>{order.title}</td>
@@ -98,7 +71,7 @@ const Orderline = observer(({ order, onChangePrice, onChangeCurrency }) => {
         <NumberInput
           value={order.price}
           onChange={(value) => {
-            onChangePrice(order, value)
+            order.setPrice(value)
           }}
         />
       </td>
@@ -106,22 +79,17 @@ const Orderline = observer(({ order, onChangePrice, onChangeCurrency }) => {
         <Currency
           value={order.currency}
           onChange={(e) => {
-            onChangeCurrency(order, e.target.value)
+            order.setCurrency(e.target.value)
           }}
         />
       </td>
-      <td>{formatPrice(getOrderPrice(order, currencies))} £</td>
+      <td>{formatPrice(order.priceInPound)} £</td>
     </tr>
   )
 })
 
-const OrderTotal = observer(({ orders }) => {
-  const currencies = useContext(CurrencyContext)
-  return (
-    <div className="total">
-      {formatPrice(getOrderTotal(orders, currencies))} £
-    </div>
-  )
+const OrderTotal = observer(({ store }) => {
+  return <div className="total">{formatPrice(store.orderTotal)} £</div>
 })
 
 const Currencies = observer(({ currencies, onChangeCurrency }) => {
@@ -134,7 +102,7 @@ const Currencies = observer(({ currencies, onChangeCurrency }) => {
             <NumberInput
               value={rate}
               onChange={(value) => {
-                onChangeCurrency(currency, value)
+                currencies[currency] = value
               }}
             />
           </td>

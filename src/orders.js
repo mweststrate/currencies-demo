@@ -1,17 +1,37 @@
 import { uuidv4 } from "./utils"
+import { observable, makeAutoObservable } from "mobx"
 
 export function getInitialCurrencies() {
-  return {
+  return observable({
     eur: 1.12,
     usd: 1.33,
     rup: 97.45,
     aus: 1.75,
     can: 1.75
-  }
+  })
 }
 
-export function getInitialOrders() {
-  return [
+export function createOrderStore(currencies) {
+  const store = makeAutoObservable({
+    currencies,
+    orders: [],
+    get orderTotal() {
+      return store.orders.reduce((acc, order) => acc + order.priceInPound, 0)
+    },
+    addOrder(initialData) {
+      store.orders.push(createOrder(store, initialData))
+    },
+    addRandomOrder() {
+      createOrder(store, {
+        id: uuidv4(),
+        title: "Item " + Math.round(Math.random() * 1000),
+        price: Math.round(Math.random() * 1000),
+        currency: "usd"
+      })
+    }
+  })
+
+  ;[
     {
       id: uuidv4(),
       title: "The LEGO Movie 2: The Second Part",
@@ -36,37 +56,25 @@ export function getInitialOrders() {
       price: 1200,
       currency: "eur"
     }
-  ]
+  ].forEach(store.addOrder)
+
+  return store
 }
 
-export function getOrderPrice(order, currencies) {
-  return order.price * (1 / currencies[order.currency])
-}
-
-export function setOrderPrice(order, newPrice) {
-  order.price = newPrice
-}
-
-export function setOrderCurrency(order, currency) {
-  order.currency = currency
-}
-
-export function getOrderTotal(orders, currencies) {
-  return orders.reduce(
-    (acc, order) => acc + getOrderPrice(order, currencies),
-    0
-  )
-}
-
-export function addOrder(orders) {
-  orders.push({
-    id: uuidv4(),
-    title: "Item " + Math.round(Math.random() * 1000),
-    price: Math.round(Math.random() * 1000),
-    currency: "usd"
+export function createOrder(store, initialData) {
+  return makeAutoObservable({
+    id: initialData.id,
+    title: initialData.title,
+    price: initialData.price,
+    currency: initialData.currency,
+    get priceInPound() {
+      return this.price * (1 / store.currencies[this.currency])
+    },
+    setPrice(newPrice) {
+      this.price = newPrice
+    },
+    setCurrency(newCurrency) {
+      this.currency = newCurrency
+    }
   })
-}
-
-export function setCurrencyRate(currencies, currency, price) {
-  currencies[currency] = price
 }
