@@ -1,3 +1,73 @@
+@import url("https://fonts.googleapis.com/css2?family=Open+Sans&family=Parisienne&display=swap");
 body {
-  font-family: sans-serif;
+  font-family: "Open Sans", sans-serif;
+  margin: 40px;
+  font-size: 14pt;
+}
+
+h1 {
+  font-family: "Parisienne", cursive;
+  text-align: center;
+  color: #888;
+  font-size: 22pt;
+  margin-top: 80px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+thead {
+  margin-bottom: 8px;
+}
+
+th {
+  border-bottom: 1px solid #ccc;
+}
+
+td,
+th,
+.total {
+  padding: 8px 16px;
+  text-align: center;
+}
+
+td:nth-child(4) {
+  text-align: right;
+}
+
+input {
+  width: 100px;
+  text-align: center;
+  white-space: nowrap;
+}
+
+input,
+select,
+button {
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-size: 14pt;
+}
+
+.actions {
+  margin-top: 20px;
+  margin-bottom: 20px;
+  display: flex;
+  width: 100%;
+}
+
+.total {
+  /* float: right; */
+  flex-grow: 1;
+  text-align: right;
+  color: #888;
+  /* border-top: 1px solid #ccc; */
+}
+
+button {
+  width: 100px;
+  height: 30px;
 }

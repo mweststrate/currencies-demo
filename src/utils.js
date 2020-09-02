@@ -28,7 +28,7 @@ export function useForceUpdateRoot() {
 
 export function Table({ children, columns }) {
   const columnNames = useMemo(() => {
-    return columns.map((column) => <th key={column}>{column}</th>)
+    return columns.map((column, idx) => <th key={idx}>{column}</th>)
   }, columns)
 
   return (
@@ -47,7 +47,10 @@ export function formatPrice(price) {
 
 const flags = {
   eur: "🇪🇺",
-  usd: "🇺🇸"
+  usd: "🇺🇸",
+  rup: "🇮🇳",
+  aus: "🇦🇺",
+  can: "🇨🇦"
 }
 
 export function formatCurrency(currency) {

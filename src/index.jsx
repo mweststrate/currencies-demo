@@ -41,17 +41,19 @@ const App = () => {
     <CurrencyContext.Provider value={currencies}>
       <div className="App">
         <h1>Orders</h1>
-        <button
-          onClick={() => {
-            addOrder(orders)
-            update()
-          }}
-        >
-          🆕
-        </button>
         <Orders orders={orders} />
-        <OrderTotal orders={orders} />
-        <h1>Currencies</h1>
+        <div className="actions">
+          <button
+            onClick={() => {
+              addOrder(orders)
+              update()
+            }}
+          >
+            Add
+          </button>
+          <OrderTotal orders={orders} />
+        </div>
+        <h1>Exchange rates</h1>
         <Currencies currencies={currencies} />
       </div>
     </CurrencyContext.Provider>
@@ -60,7 +62,7 @@ const App = () => {
 
 const Orders = ({ orders }) => {
   return (
-    <Table columns={["Article", "Price", "Currency", "Price £"]}>
+    <Table columns={["Article", "Price", "Currency", "Price"]}>
       {orders.map((order) => (
         <Orderline key={order.id} order={order} />
       ))}
@@ -92,14 +94,18 @@ const Orderline = ({ order }) => {
           }}
         />
       </td>
-      <td>{formatPrice(getOrderPrice(order, currencies))}</td>
+      <td>{formatPrice(getOrderPrice(order, currencies))} £</td>
     </tr>
   )
 }
 
 const OrderTotal = ({ orders }) => {
   const currencies = useContext(CurrencyContext)
-  return <div>Total: £ {formatPrice(getOrderTotal(orders, currencies))}</div>
+  return (
+    <div className="total">
+      {formatPrice(getOrderTotal(orders, currencies))} £
+    </div>
+  )
 }
 
 const Currencies = ({ currencies }) => {
