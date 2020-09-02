@@ -1,115 +1,142 @@
 import * as React from "react"
-import { useState, useCallback, memo, useEffect } from "react"
-import { DraggableCore } from "react-draggable"
+import {
+  useState,
+  useCallback,
+  memo,
+  useEffect,
+  createContext,
+  useRef,
+  useContext
+} from "react"
 import { render } from "react-dom"
-import { getInitialState } from "./circles"
-import { uuidv4 } from "./utils"
+import {
+  getInitialOrders,
+  getInitialCurrencies,
+  getOrderPrice,
+  setOrderPrice,
+  getOrderTotal,
+  setOrderCurrency,
+  setCurrencyRate,
+  addOrder
+} from "./orders"
+import {
+  Table,
+  useForceUpdate,
+  formatPrice,
+  useForceUpdateRoot,
+  formatCurrency,
+  NumberInput
+} from "./utils"
 
 import "./styles.css"
 
+const CurrencyContext = createContext()
+
 const App = () => {
-  const [state, setState] = useState(() => getInitialState())
-
-  const onHandleDrag = useCallback(({ id, deltaX, deltaY }) => {
-    setState(state => {
-      const base = state.circles[id]
-      return {
-        ...state,
-        circles: {
-          ...state.circles,
-          [id]: {
-            ...base,
-            x: base.x + deltaX,
-            y: base.y + deltaY
-          }
-        }
-      }
-    })
-  }, [])
-
-  const onDoubleClick = useCallback(e => {
-    const x = e.clientX - 50;
-    const y = e.clientY - 50;
-    setState(state => {
-      const id = uuidv4()
-      const from = Object.keys(state.circles)[
-        Object.keys(state.circles).length - 1
-      ]
-      return {
-        ...state,
-        circles: {
-          ...state.circles,
-          [id]: { 
-            id, x, y
-          }
-        },
-        lines: {
-          ...state.lines,
-          [uuidv4()]: { from, to: id }
-        }
-      }
-    })
-  }, [])
-
-  useEffect(() => {
-    for(let i = 0; i < 10000; i++) {
-      onDoubleClick({
-        clientX: Math.random() * 1000,
-        clientY: Math.random() * 1000
-      })
-    }
-  }, [])
-
+  useForceUpdateRoot()
+  const update = useForceUpdate()
+  const currencies = useRef(getInitialCurrencies()).current
+  const orders = useRef(getInitialOrders()).current
   return (
-    <div className="App" onDoubleClick={onDoubleClick}>
-      <Lines lines={state.lines} circles={state.circles} />
-      <Circles circles={state.circles} onHandleDrag={onHandleDrag} />
-    </div>
+    <CurrencyContext.Provider value={currencies}>
+      <div className="App">
+        <h1>Orders</h1>
+        <button
+          onClick={() => {
+            addOrder(orders)
+            update()
+          }}
+        >
+          🆕
+        </button>
+        <Orders orders={orders} />
+        <OrderTotal orders={orders} />
+        <h1>Currencies</h1>
+        <Currencies currencies={currencies} />
+      </div>
+    </CurrencyContext.Provider>
   )
 }
 
-const Lines = memo(function Lines ({ lines, circles }) { return (
-  <svg>
-    {Object.keys(lines).map(key => (
-      <Line key={key} line={lines[key]} circles={circles} />
-    ))}
-  </svg>
-)})
-
-const Line = memo(
-  function Line ({ line, circles }) {
-    const from = circles[line.from]
-    const to = circles[line.to]
-    const [x1, y1, x2, y2] = [from.x + 50, from.y + 50, to.x + 50, to.y + 50]
-    return <path className="line" d={`M${x1} ${y1} L${x2} ${y2}`} />
-  })
-
-const Circles = memo(function Circles({ circles, onHandleDrag, onDragEnd, onDoubleClick }) {
+const Orders = ({ orders }) => {
   return (
-    <div className="circles" onDoubleClick={onDoubleClick}>
-      {Object.keys(circles).map(key => (
-        <Circle
-          key={key}
-          circle={circles[key]}
-          onHandleDrag={onHandleDrag}
-          onDragEnd={onDragEnd}
-        />
+    <Table columns={["Article", "Price", "Currency", "Price £"]}>
+      {orders.map((order) => (
+        <Orderline key={order.id} order={order} />
       ))}
-    </div>
+    </Table>
   )
-})
+}
 
-const Circle = memo(function Circle({ circle: { x, y, id }, onHandleDrag, onDragEnd }) {
-  const handleDrag = useCallback((_, { deltaX, deltaY }) => {
-    onHandleDrag({ id, deltaX, deltaY })
-  }, [])
+const Orderline = ({ order }) => {
+  const update = useForceUpdate()
+  const currencies = useContext(CurrencyContext)
+  return (
+    <tr>
+      <td>{order.title}</td>
+      <td>
+        <NumberInput
+          value={order.price}
+          onChange={(value) => {
+            setOrderPrice(order, value)
+            update()
+          }}
+        />
+      </td>
+      <td>
+        <Currency
+          value={order.currency}
+          onChange={(e) => {
+            setOrderCurrency(order, e.target.value)
+            update()
+          }}
+        />
+      </td>
+      <td>{formatPrice(getOrderPrice(order, currencies))}</td>
+    </tr>
+  )
+}
+
+const OrderTotal = ({ orders }) => {
+  const currencies = useContext(CurrencyContext)
+  return <div>Total: £ {formatPrice(getOrderTotal(orders, currencies))}</div>
+}
+
+const Currencies = ({ currencies }) => {
+  const update = useForceUpdate()
 
   return (
-    <DraggableCore onDrag={handleDrag} onStop={onDragEnd}>
-      <div className="circle" style={{ left: x, top: y }} />
-    </DraggableCore>
+    <Table columns={["Currency", "Exchange rate"]}>
+      {Object.entries(currencies).map(([currency, rate]) => (
+        <tr key={currency}>
+          <td>{formatCurrency(currency)}</td>
+          <td>
+            <NumberInput
+              value={rate}
+              onChange={(value) => {
+                setCurrencyRate(currencies, currency, value)
+                update()
+              }}
+            />
+          </td>
+        </tr>
+      ))}
+    </Table>
   )
-})
+}
+
+export function Currency({ value, onChange }) {
+  const currencies = useContext(CurrencyContext)
+  return (
+    <select onChange={onChange} value={value}>
+      {Object.keys(currencies).map((c) => (
+        <option key={c} value={c}>
+          {formatCurrency(c)}
+        </option>
+      ))}
+    </select>
+  )
+}
 
 const rootElement = document.getElementById("app")
 render(<App />, rootElement)
