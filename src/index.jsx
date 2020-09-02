@@ -2,7 +2,6 @@ import * as React from "react"
 import {
   useState,
   useCallback,
-  memo,
   useEffect,
   createContext,
   useRef,
@@ -33,20 +32,27 @@ import "./styles.css"
 const CurrencyContext = createContext()
 
 const App = () => {
-  useForceUpdateRoot()
-  const update = useForceUpdate()
-  const currencies = useRef(getInitialCurrencies()).current
-  const orders = useRef(getInitialOrders()).current
+  const [currencies, setCurrencies] = useState(getInitialCurrencies)
+  const [orders, setOrders] = useState(getInitialOrders)
   return (
     <CurrencyContext.Provider value={currencies}>
       <div className="App">
         <h1>Orders</h1>
-        <Orders orders={orders} />
+        <Orders
+          orders={orders}
+          onChangePrice={(orderId, newPrice) => {
+            setOrders((orders) => setOrderPrice(orders, orderId, newPrice))
+          }}
+          onChangeCurrency={(orderId, newCurrency) => {
+            setOrders((orders) =>
+              setOrderCurrency(orders, orderId, newCurrency)
+            )
+          }}
+        />
         <div className="actions">
           <button
             onClick={() => {
-              addOrder(orders)
-              update()
+              setOrders(addOrder(orders))
             }}
           >
             Add
@@ -54,24 +60,35 @@ const App = () => {
           <OrderTotal orders={orders} />
         </div>
         <h1>Exchange rates</h1>
-        <Currencies currencies={currencies} />
+        <Currencies
+          currencies={currencies}
+          onChangeCurrency={(currency, newRate) => {
+            setCurrencies((currencies) =>
+              setCurrencyRate(currencies, currency, newRate)
+            )
+          }}
+        />
       </div>
     </CurrencyContext.Provider>
   )
 }
 
-const Orders = ({ orders }) => {
+const Orders = ({ orders, onChangePrice, onChangeCurrency }) => {
   return (
     <Table columns={["Article", "Price", "Currency", "Price"]}>
       {orders.map((order) => (
-        <Orderline key={order.id} order={order} />
+        <Orderline
+          key={order.id}
+          order={order}
+          onChangeCurrency={onChangeCurrency}
+          onChangePrice={onChangePrice}
+        />
       ))}
     </Table>
   )
 }
 
-const Orderline = ({ order }) => {
-  const update = useForceUpdate()
+const Orderline = ({ order, onChangePrice, onChangeCurrency }) => {
   const currencies = useContext(CurrencyContext)
   return (
     <tr>
@@ -80,8 +97,7 @@ const Orderline = ({ order }) => {
         <NumberInput
           value={order.price}
           onChange={(value) => {
-            setOrderPrice(order, value)
-            update()
+            onChangePrice(order.id, value)
           }}
         />
       </td>
@@ -89,8 +105,7 @@ const Orderline = ({ order }) => {
         <Currency
           value={order.currency}
           onChange={(e) => {
-            setOrderCurrency(order, e.target.value)
-            update()
+            onChangeCurrency(order.id, e.target.value)
           }}
         />
       </td>
@@ -108,9 +123,7 @@ const OrderTotal = ({ orders }) => {
   )
 }
 
-const Currencies = ({ currencies }) => {
-  const update = useForceUpdate()
-
+const Currencies = ({ currencies, onChangeCurrency }) => {
   return (
     <Table columns={["Currency", "Exchange rate"]}>
       {Object.entries(currencies).map(([currency, rate]) => (
@@ -120,8 +133,7 @@ const Currencies = ({ currencies }) => {
             <NumberInput
               value={rate}
               onChange={(value) => {
-                setCurrencyRate(currencies, currency, value)
-                update()
+                onChangeCurrency(currency, value)
               }}
             />
           </td>
