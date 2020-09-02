@@ -1,0 +1,24 @@
+{
+  "name": "circles-and-usereducer",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.html",
+  "scripts": {
+    "start": "parcel public/index.html --open",
+    "build": "parcel build public/index.html"
+  },
+  "dependencies": {
+    "immer": "^2.1.4",
+    "mobx": "^5.9.0",
+    "mobx-react": "6.0.0-rc.4",
+    "react": "16.8.4",
+    "react-dom": "16.8.4",
+    "react-draggable": "3.2.1"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.4.0",
+    "@babel/preset-react": "^7.0.0",
+    "parcel-bundler": "^1.12.3"
+  },
+  "keywords": []
+}
