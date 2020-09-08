@@ -1,16 +1,17 @@
 import { uuidv4 } from "./utils"
+import { observable, makeAutoObservable } from "mobx"
 
 export function getInitialCurrencies() {
-  return {
+  return observable({
     eur: 1.12,
     usd: 1.33,
     rup: 97.45,
     aus: 1.75,
     can: 1.75
-  }
+  })
 }
 
-export function getInitialOrders() {
+function getInitialOrders() {
   return [
     {
       id: uuidv4(),
@@ -39,34 +40,43 @@ export function getInitialOrders() {
   ]
 }
 
-export function getOrderPrice(order, currencies) {
-  return order.price * (1 / currencies[order.currency])
-}
-
-export function setOrderPrice(order, newPrice) {
-  order.price = newPrice
-}
-
-export function setOrderCurrency(order, currency) {
-  order.currency = currency
-}
-
-export function getOrderTotal(orders, currencies) {
-  return orders.reduce(
-    (acc, order) => acc + getOrderPrice(order, currencies),
-    0
-  )
-}
-
-export function addOrder(orders) {
-  orders.push({
-    id: uuidv4(),
-    title: "Item " + Math.round(Math.random() * 1000),
-    price: Math.round(Math.random() * 1000),
-    currency: "usd"
+export function createOrder({ id, title, price, currency }, currencies) {
+  return makeAutoObservable({
+    id,
+    title,
+    price,
+    currency,
+    get priceInPound() {
+      return this.price * (1 / currencies[this.currency])
+    },
+    setPrice(newPrice) {
+      this.price = newPrice
+    },
+    setCurrency(newCurrency) {
+      this.currency = newCurrency
+    }
   })
 }
 
-export function setCurrencyRate(currencies, currency, price) {
-  currencies[currency] = price
+export function createOrderStore(currencies) {
+  const store = makeAutoObservable({
+    orders: [],
+    get orderTotal() {
+      return this.orders.reduce((acc, order) => acc + order.priceInPound, 0)
+    },
+    addOrder(data) {
+      this.orders.push(createOrder(data, currencies))
+    },
+    addRandomOrder() {
+      this.addOrder({
+        id: uuidv4(),
+        title: "Item " + Math.round(Math.random() * 1000),
+        price: Math.round(Math.random() * 1000),
+        currency: "usd"
+      })
+    }
+  })
+
+  getInitialOrders().forEach((o) => store.addOrder(o))
+  return store
 }
