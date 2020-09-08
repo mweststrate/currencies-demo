@@ -1,11 +1,5 @@
 import * as React from "react"
-import {
-  useState,
-  useCallback,
-  useMemo,
-  createContext,
-  useContext
-} from "react"
+import { useState, useCallback, useMemo } from "react"
 
 export function uuidv4() {
   return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function (c) {
@@ -15,15 +9,9 @@ export function uuidv4() {
   })
 }
 
-let updater
-
 export function useForceUpdate() {
-  return updater
-}
-
-export function useForceUpdateRoot() {
-  const [count, setCount] = useState(0)
-  updater = useCallback(() => setCount((count) => count + 1), [])
+  const [_tick, setTick] = useState(0)
+  return useCallback(() => setTick((t) => t + 1), [])
 }
 
 export function Table({ children, columns }) {
