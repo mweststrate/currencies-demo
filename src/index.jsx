@@ -1,5 +1,6 @@
 import * as React from "react"
-import { createContext, useRef, useContext } from "react"
+import { createContext, useContext } from "react"
+import { observer, useLocalObservable } from "mobx-react-lite"
 import { render } from "react-dom"
 import {
   getInitialOrders,
@@ -11,39 +12,28 @@ import {
   setCurrencyRate,
   addOrder
 } from "./orders"
-import {
-  Table,
-  useForceUpdate,
-  formatPrice,
-  formatCurrency,
-  NumberInput
-} from "./utils"
+import { Table, formatPrice, formatCurrency, NumberInput } from "./utils"
 
 import "./styles.css"
 
 const CurrencyContext = createContext()
 
 const App = () => {
-  const render = useForceUpdate()
-  const currencies = useRef(getInitialCurrencies()).current
-  const orders = useRef(getInitialOrders()).current
+  const currencies = useLocalObservable(getInitialCurrencies)
+  const orders = useLocalObservable(getInitialOrders)
 
   const handleAdd = () => {
     addOrder(orders)
-    render()
   }
   const handleChangePrice = (order, newPrice) => {
     setOrderPrice(order, newPrice)
-    render()
   }
   const handleChangeCurrency = (order, newCurrency) => {
     setOrderCurrency(order, newCurrency)
-    render()
   }
 
   const handleChangeCurrencyRate = (currency, newRate) => {
     setCurrencyRate(currencies, currency, newRate)
-    render()
   }
 
   return (
@@ -69,7 +59,7 @@ const App = () => {
   )
 }
 
-const Orders = ({ orders, onChangePrice, onChangeCurrency }) => {
+const Orders = observer(({ orders, onChangePrice, onChangeCurrency }) => {
   return (
     <Table columns={["Article", "Price", "Currency", "Price"]}>
       {orders.map((order) => (
@@ -82,9 +72,9 @@ const Orders = ({ orders, onChangePrice, onChangeCurrency }) => {
       ))}
     </Table>
   )
-}
+})
 
-const Orderline = ({ order, onChangePrice, onChangeCurrency }) => {
+const Orderline = observer(({ order, onChangePrice, onChangeCurrency }) => {
   const currencies = useContext(CurrencyContext)
   return (
     <tr>
@@ -108,18 +98,18 @@ const Orderline = ({ order, onChangePrice, onChangeCurrency }) => {
       <td>{formatPrice(getOrderPrice(order, currencies))} £</td>
     </tr>
   )
-}
+})
 
-const OrderTotal = ({ orders }) => {
+const OrderTotal = observer(({ orders }) => {
   const currencies = useContext(CurrencyContext)
   return (
     <div className="total">
       {formatPrice(getOrderTotal(orders, currencies))} £
     </div>
   )
-}
+})
 
-const Currencies = ({ currencies, onChangeCurrency }) => {
+const Currencies = observer(({ currencies, onChangeCurrency }) => {
   return (
     <Table columns={["Currency", "Exchange rate"]}>
       {Object.entries(currencies).map(([currency, rate]) => (
@@ -137,7 +127,7 @@ const Currencies = ({ currencies, onChangeCurrency }) => {
       ))}
     </Table>
   )
-}
+})
 
 export function Currency({ value, onChange }) {
   const currencies = useContext(CurrencyContext)
