@@ -1,5 +1,5 @@
 import * as React from "react"
-import { createContext, useRef, useContext } from "react"
+import { useState, useCallback, memo, createContext, useContext } from "react"
 import { render } from "react-dom"
 import {
   getInitialOrders,
@@ -11,40 +11,31 @@ import {
   setCurrencyRate,
   addOrder
 } from "./orders"
-import {
-  Table,
-  useForceUpdate,
-  formatPrice,
-  formatCurrency,
-  NumberInput
-} from "./utils"
+import { Table, formatPrice, formatCurrency, NumberInput } from "./utils"
 
 import "./styles.css"
 
 const CurrencyContext = createContext()
 
 const App = () => {
-  const render = useForceUpdate()
-  const currencies = useRef(getInitialCurrencies()).current
-  const orders = useRef(getInitialOrders()).current
+  const [currencies, setCurrencies] = useState(getInitialCurrencies)
+  const [orders, setOrders] = useState(getInitialOrders)
 
-  const handleAdd = () => {
-    addOrder(orders)
-    render()
-  }
-  const handleChangePrice = (order, newPrice) => {
-    setOrderPrice(order, newPrice)
-    render()
-  }
-  const handleChangeCurrency = (order, newCurrency) => {
-    setOrderCurrency(order, newCurrency)
-    render()
-  }
+  const handleAdd = useCallback(() => {
+    setOrders((orders) => addOrder(orders))
+  }, [])
+  const handleChangePrice = useCallback((orderId, newPrice) => {
+    setOrders((orders) => setOrderPrice(orders, orderId, newPrice))
+  }, [])
+  const handleChangeCurrency = useCallback((orderId, newCurrency) => {
+    setOrders((orders) => setOrderCurrency(orders, orderId, newCurrency))
+  }, [])
 
-  const handleChangeCurrencyRate = (currency, newRate) => {
-    setCurrencyRate(currencies, currency, newRate)
-    render()
-  }
+  const handleChangeCurrencyRate = useCallback((currency, newRate) => {
+    setCurrencies((currencies) =>
+      setCurrencyRate(currencies, currency, newRate)
+    )
+  }, [])
 
   return (
     <CurrencyContext.Provider value={currencies}>
@@ -69,7 +60,7 @@ const App = () => {
   )
 }
 
-const Orders = ({ orders, onChangePrice, onChangeCurrency }) => {
+const Orders = memo(({ orders, onChangePrice, onChangeCurrency }) => {
   return (
     <Table columns={["Article", "Price", "Currency", "Price"]}>
       {orders.map((order) => (
@@ -82,9 +73,9 @@ const Orders = ({ orders, onChangePrice, onChangeCurrency }) => {
       ))}
     </Table>
   )
-}
+})
 
-const Orderline = ({ order, onChangePrice, onChangeCurrency }) => {
+const Orderline = memo(({ order, onChangePrice, onChangeCurrency }) => {
   const currencies = useContext(CurrencyContext)
   return (
     <tr>
@@ -93,7 +84,7 @@ const Orderline = ({ order, onChangePrice, onChangeCurrency }) => {
         <NumberInput
           value={order.price}
           onChange={(value) => {
-            onChangePrice(order, value)
+            onChangePrice(order.id, value)
           }}
         />
       </td>
@@ -101,25 +92,25 @@ const Orderline = ({ order, onChangePrice, onChangeCurrency }) => {
         <Currency
           value={order.currency}
           onChange={(e) => {
-            onChangeCurrency(order, e.target.value)
+            onChangeCurrency(order.id, e.target.value)
           }}
         />
       </td>
       <td>{formatPrice(getOrderPrice(order, currencies))} £</td>
     </tr>
   )
-}
+})
 
-const OrderTotal = ({ orders }) => {
+const OrderTotal = memo(({ orders }) => {
   const currencies = useContext(CurrencyContext)
   return (
     <div className="total">
       {formatPrice(getOrderTotal(orders, currencies))} £
     </div>
   )
-}
+})
 
-const Currencies = ({ currencies, onChangeCurrency }) => {
+const Currencies = memo(({ currencies, onChangeCurrency }) => {
   return (
     <Table columns={["Currency", "Exchange rate"]}>
       {Object.entries(currencies).map(([currency, rate]) => (
@@ -137,7 +128,7 @@ const Currencies = ({ currencies, onChangeCurrency }) => {
       ))}
     </Table>
   )
-}
+})
 
 export function Currency({ value, onChange }) {
   const currencies = useContext(CurrencyContext)
