@@ -76,12 +76,14 @@ const App = () => {
 }
 
 const Orders = memo(({ orders, onChangePrice, onChangeCurrency }) => {
+  const currencies = useContext(CurrencyContext)
   return (
     <Table columns={["Article", "Price", "Currency", "Price"]}>
       {orders.map((order) => (
         <Orderline
           key={order.id}
           order={order}
+          currencies={currencies}
           onChangeCurrency={onChangeCurrency}
           onChangePrice={onChangePrice}
         />
@@ -90,31 +92,37 @@ const Orders = memo(({ orders, onChangePrice, onChangeCurrency }) => {
   )
 })
 
-const Orderline = memo(({ order, onChangePrice, onChangeCurrency }) => {
-  const currencies = useContext(CurrencyContext)
-  return (
-    <tr>
-      <td>{order.title}</td>
-      <td>
-        <NumberInput
-          value={order.price}
-          onChange={(value) => {
-            onChangePrice(order.id, value)
-          }}
-        />
-      </td>
-      <td>
-        <Currency
-          value={order.currency}
-          onChange={(e) => {
-            onChangeCurrency(order.id, e.target.value)
-          }}
-        />
-      </td>
-      <td>{formatPrice(getOrderPrice(order, currencies))} £</td>
-    </tr>
-  )
-})
+const Orderline = memo(
+  ({ order, onChangePrice, onChangeCurrency, currencies }) => {
+    return (
+      <tr>
+        <td>{order.title}</td>
+        <td>
+          <NumberInput
+            value={order.price}
+            onChange={(value) => {
+              onChangePrice(order.id, value)
+            }}
+          />
+        </td>
+        <td>
+          <Currency
+            value={order.currency}
+            onChange={(e) => {
+              onChangeCurrency(order.id, e.target.value)
+            }}
+          />
+        </td>
+        <td>{formatPrice(getOrderPrice(order, currencies))} £</td>
+      </tr>
+    )
+  },
+  (prev, next) =>
+    prev.order === next.order &&
+    (prev.currencies === next.currencies ||
+      prev.currencies[prev.order.currency] ===
+        next.currencies[next.order.currency])
+)
 
 const OrderTotal = memo(({ orders }) => {
   const currencies = useContext(CurrencyContext)
