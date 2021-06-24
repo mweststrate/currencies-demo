@@ -5,20 +5,23 @@
   "main": "index.html",
   "scripts": {
     "start": "parcel public/index.html --open",
-    "build": "parcel build public/index.html"
+    "build": "parcel build public/index.html",
+    "prepare": "relative-deps"
   },
   "dependencies": {
-    "immer": "^7.0.8",
-    "mobx": "^6.0.0-rc.7",
-    "mobx-react-lite": "3.0.0-beta.1",
-    "react": "16.13.1",
-    "react-dom": "16.13.1",
-    "react-draggable": "^4.4.3"
+    "mobx": "^6.3.2",
+    "mobx-react-lite": "3.2.0",
+    "react": "18.0.0-alpha-d7dce572c",
+    "react-dom": "18.0.0-alpha-d7dce572c"
   },
   "devDependencies": {
     "@babel/core": "^7.11.5",
     "@babel/preset-react": "^7.10.4",
-    "parcel-bundler": "^1.12.4"
+    "parcel-bundler": "^1.12.4",
+    "relative-deps": "^1.0.7"
   },
-  "keywords": []
+  "keywords": [],
+  "relativeDependencies": {
+    "mobx-react-lite": "/Users/mweststrate/Desktop/mobx/packages/mobx-react-lite"
+  }
 }

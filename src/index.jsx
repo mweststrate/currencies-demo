@@ -1,33 +1,11 @@
 import * as React from "react"
-import {
-  useState,
-  useCallback,
-  memo,
-  useEffect,
-  createContext,
-  useRef,
-  useContext
-} from "react"
-import { observer, useLocalObservable } from "mobx-react-lite"
-import { render } from "react-dom"
-import {
-  createOrderStore,
-  getInitialCurrencies,
-  getOrderPrice,
-  setOrderPrice,
-  getOrderTotal,
-  setOrderCurrency,
-  setCurrencyRate,
-  addOrder
-} from "./orders"
-import {
-  Table,
-  useForceUpdate,
-  formatPrice,
-  useForceUpdateRoot,
-  formatCurrency,
-  NumberInput
-} from "./utils"
+import { useState, createContext, useContext } from "react"
+import { observer } from "mobx-react-lite"
+// @ts-ignore
+import { createRoot } from "react-dom"
+import { createOrderStore, getInitialCurrencies } from "./orders"
+import { Table, formatPrice, formatCurrency, NumberInput } from "./utils"
+import { action } from "mobx"
 
 import "./styles.css"
 
@@ -38,18 +16,20 @@ const App = () => {
   const [store] = useState(() => createOrderStore(currencies))
 
   return (
-    <CurrencyContext.Provider value={currencies}>
-      <div className="App">
-        <h1>Orders</h1>
-        <Orders orders={store.orders} />
-        <div className="actions">
-          <button onClick={store.addRandomOrder}>Add</button>
-          <OrderTotal store={store} />
+    <React.StrictMode>
+      <CurrencyContext.Provider value={currencies}>
+        <div className="App">
+          <h1>Orders</h1>
+          <Orders orders={store.orders} />
+          <div className="actions">
+            <button onClick={store.addRandomOrder}>Add</button>
+            <OrderTotal store={store} />
+          </div>
+          <h1>Exchange rates</h1>
+          <Currencies currencies={currencies} />
         </div>
-        <h1>Exchange rates</h1>
-        <Currencies currencies={currencies} />
-      </div>
-    </CurrencyContext.Provider>
+      </CurrencyContext.Provider>
+    </React.StrictMode>
   )
 }
 
@@ -101,9 +81,9 @@ const Currencies = observer(({ currencies, onChangeCurrency }) => {
           <td>
             <NumberInput
               value={rate}
-              onChange={(value) => {
+              onChange={action((value) => {
                 currencies[currency] = value
-              }}
+              })}
             />
           </td>
         </tr>
@@ -126,4 +106,4 @@ export function Currency({ value, onChange }) {
 }
 
 const rootElement = document.getElementById("app")
-render(<App />, rootElement)
+createRoot(rootElement).render(<App />)
