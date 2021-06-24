@@ -22,7 +22,7 @@ export function createOrderStore(currencies) {
       store.orders.push(createOrder(store, initialData))
     },
     addRandomOrder() {
-      createOrder(store, {
+      store.addOrder({
         id: uuidv4(),
         title: "Item " + Math.round(Math.random() * 1000),
         price: Math.round(Math.random() * 1000),
