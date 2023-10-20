@@ -1,5 +1,7 @@
 import { uuidv4 } from "./utils"
-import { observable, makeAutoObservable } from "mobx"
+import { observable, makeAutoObservable, action, computed } from "mobx"
+
+type Currencies = { [key: string]: number }
 
 export function getInitialCurrencies() {
   return observable({
@@ -39,23 +41,39 @@ function getInitialOrders() {
     }
   ]
 }
+class Order {
+  readonly id: string
+  @observable accessor title: string = "";
+  @observable accessor price: number = 0;
+  @observable accessor currency: string;
+  readonly currencies: Currencies;
 
-export function createOrder({ id, title, price, currency }, currencies) {
-  return makeAutoObservable({
-    id,
-    title,
-    price,
-    currency,
-    get priceInPound() {
-      return this.price * (1 / currencies[this.currency])
-    },
-    setPrice(newPrice) {
-      this.price = newPrice
-    },
-    setCurrency(newCurrency) {
-      this.currency = newCurrency
-    }
-  })
+  constructor(id: string,
+    title: string,
+    price: number,
+    currency: string,
+    currencies: Currencies) {
+    this.id = id
+    this.title = title;
+    this.price = price;
+    this.currency = currency;
+    this.currencies = currencies;
+  }
+
+  @computed
+  get priceInPound() {
+    return this.price * (1 / this.currencies[this.currency])
+  }
+
+  @action
+  setPrice(newPrice) {
+    this.price = newPrice
+  }
+
+  @action
+  setCurrency(newCurrency) {
+    this.currency = newCurrency
+  }
 }
 
 export function createOrderStore(currencies) {
@@ -64,8 +82,14 @@ export function createOrderStore(currencies) {
     get orderTotal() {
       return this.orders.reduce((acc, order) => acc + order.priceInPound, 0)
     },
-    addOrder(data) {
-      this.orders.push(createOrder(data, currencies))
+    addOrder({ id, title, price, currency }) {
+      this.orders.push(new Order(
+        id,
+        title,
+        price,
+        currency,
+        currencies
+      ));
     },
     addRandomOrder() {
       this.addOrder({

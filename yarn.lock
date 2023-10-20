@@ -3310,10 +3310,10 @@ mobx-react-lite@3.0.0-beta.1:
   resolved "https://registry.yarnpkg.com/mobx-react-lite/-/mobx-react-lite-3.0.0-beta.1.tgz#e5f7522525748f88bbf33e4ba9a4fa07f19432dc"
   integrity sha512-SIAa6oxGVHfYydCo/iNq/r8AEmwRcyjXcq94bSDUy69pfFlzVbAxVPFY5Cp3G0JwciMSFeEuomGrP8noQaSzPw==
 
-mobx@^6.0.0-rc.7:
-  version "6.0.0-rc.7"
-  resolved "https://registry.yarnpkg.com/mobx/-/mobx-6.0.0-rc.7.tgz#023c697ee64ec59643d26b0e62aad35e3e7c0a01"
-  integrity sha512-Ro1z1dBnJpDzqS30E5D5sOuHPS9UM+QAbOSYPjkbUksselXHTfG4oxLFHapVYRvPHu+0ZfB29vtGO2hpsvKBqQ==
+mobx@6.11.0-pre:
+  version "6.11.0-pre"
+  resolved "https://registry.yarnpkg.com/mobx/-/mobx-6.11.0-pre.tgz#a05be69cc929a785a9765ce1cfcda03208064232"
+  integrity sha512-iZMbqt5xU2klyH++62lh932PwlAFSvk7QujR58+27KZDcoOFxloPsZ5IB7Hw8mV79tAalTWjG3tjNeXCLi+qPg==
 
 ms@2.0.0:
   version "2.0.0"
@@ -4989,6 +4989,11 @@ typedarray@^0.0.6:
   version "0.0.6"
   resolved "https://registry.yarnpkg.com/typedarray/-/typedarray-0.0.6.tgz#867ac74e3864187b1d3d47d996a78ec5c8830777"
   integrity sha1-hnrHTjhkGHsdPUfZlqeOxciDB3c=
+
+typescript@^5.2.2:
+  version "5.2.2"
+  resolved "https://registry.yarnpkg.com/typescript/-/typescript-5.2.2.tgz#5ebb5e5a5b75f085f22bc3f8460fba308310fa78"
+  integrity sha512-mI4WrpHsbCIcwT9cF4FZvr80QUeKvsUsUvKDoR+X/7XHQH98xYD8YHZg7ANtz2GtZt/CBq2QJ0thkGJMHfqc1w==
 
 uncss@^0.17.3:
   version "0.17.3"

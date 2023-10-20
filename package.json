@@ -9,7 +9,7 @@
   },
   "dependencies": {
     "immer": "^7.0.8",
-    "mobx": "^6.0.0-rc.7",
+    "mobx": "6.11.0-pre",
     "mobx-react-lite": "3.0.0-beta.1",
     "react": "16.13.1",
     "react-dom": "16.13.1",
@@ -18,7 +18,8 @@
   "devDependencies": {
     "@babel/core": "^7.11.5",
     "@babel/preset-react": "^7.10.4",
-    "parcel-bundler": "^1.12.4"
+    "parcel-bundler": "^1.12.4",
+    "typescript": "^5.2.2"
   },
   "keywords": []
 }
