@@ -2,7 +2,6 @@
   "name": "orders",
   "version": "1.0.0",
   "description": "",
-  "main": "index.html",
   "scripts": {
     "start": "parcel public/index.html --open",
     "build": "parcel build public/index.html"
@@ -11,14 +10,14 @@
     "immer": "^7.0.8",
     "mobx": "6.11.0-pre",
     "mobx-react-lite": "3.0.0-beta.1",
+    "parcel": "^2.10.1",
     "react": "16.13.1",
     "react-dom": "16.13.1",
     "react-draggable": "^4.4.3"
   },
   "devDependencies": {
-    "@babel/core": "^7.11.5",
-    "@babel/preset-react": "^7.10.4",
-    "parcel-bundler": "^1.12.4",
+    "@babel/core": "^7.12.0",
+    "process": "^0.11.10",
     "typescript": "^5.2.2"
   },
   "keywords": []
