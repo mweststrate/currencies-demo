@@ -1,8 +1,6 @@
 import { uuidv4 } from "./utils"
 import { observable, makeAutoObservable, action, computed } from "mobx"
 
-type Currencies = { [key: string]: number }
-
 export function getInitialCurrencies() {
   return observable({
     eur: 1.12,
@@ -42,17 +40,17 @@ function getInitialOrders() {
   ]
 }
 class Order {
-  readonly id: string
-  @observable accessor title: string = "";
-  @observable accessor price: number = 0;
-  @observable accessor currency: string;
-  readonly currencies: Currencies;
+  id
+  @observable accessor title = "";
+  @observable accessor price = 0;
+  @observable accessor currency;
+  currencies;
 
-  constructor(id: string,
-    title: string,
-    price: number,
-    currency: string,
-    currencies: Currencies) {
+  constructor(id,
+    title,
+    price,
+    currency,
+    currencies) {
     this.id = id
     this.title = title;
     this.price = price;

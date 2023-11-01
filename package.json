@@ -7,6 +7,7 @@
     "build": "parcel build public/index.html"
   },
   "dependencies": {
+    "@babel/plugin-proposal-decorators": "^7.23.2",
     "immer": "^7.0.8",
     "mobx": "6.11.0-pre",
     "mobx-react-lite": "3.0.0-beta.1",
